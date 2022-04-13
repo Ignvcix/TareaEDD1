@@ -1,0 +1,95 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+
+using namespace std;
+/*
+struct Servicios{
+char tipo_de_servicio[10];
+int cantidad_de_servicios;
+int cantidad_ticket;
+char hora_inicio[6];
+char hora_fin[6];
+};
+*/
+struct Ticket{
+char rut_funcionario[10];
+int day_of_month;
+char time[6];
+};
+
+Ticket* lecturaArchivoBin(){
+  int i,cantidad_de_registros;
+  Ticket *tickets;
+  ifstream archivo;
+  archivo.open("tickets.dat",ios::binary);
+  
+  if(!archivo.is_open()){
+    cout<<"El archivo no ha podido ser leído";
+  }
+  
+  archivo.read((char *)&cantidad_de_registros, sizeof(int));
+  tickets = new Ticket[cantidad_de_registros];
+  
+  archivo.read((char *) tickets,sizeof(Ticket)*cantidad_de_registros);
+  archivo.close();
+  //for(i=0;i<n;i++){
+  //  cout<<tickets[i].rut_funcionario<<" "<<tickets[i].day_of_month<<" "<<tickets[i].time<<endl;
+  //}
+  return tickets;
+}
+
+string lecturaArchivoASCI(){
+  int i=0;
+  string linea;
+  char n;
+  
+  string servicios[10]; 
+  
+  ifstream archivo;
+  archivo.open("servicios.txt");
+  
+  if(!archivo.is_open()){
+    cout<<"El archivo no ha podido ser leído";
+  }
+
+  int x = stoi(getline(archivo,linea));
+  while(getline(archivo,linea)){
+    if(i==0){
+      strcpy(n,linea);
+    }
+    else if{
+      
+    }
+    i++
+  }
+  
+  archivo.close();
+  return n;
+}
+
+int main(){
+  lecturaArchivoASCI(); // Ready
+  //lecturaArchivoBin();
+  }
+
+/*
+
+
+
+Cosas a considerar para detección de ticket invalidos:
+Ticket fuera del horario
+Límite de ticket x dia de un servicio
+limite ticket mensual de un servicio
+limite de ticket mensuajes totales
+
+
+salida:
+Rut-TicketsValidos/TicketsTotalesEmitidos
+Ordenada lexicográficamente
+*/
+
+
+void ordenamiento(){
+  
+}
