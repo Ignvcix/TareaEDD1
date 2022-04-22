@@ -1,95 +1,239 @@
 #include<iostream>
 #include<fstream>
 #include<string>
+#include<cstring>
 
 using namespace std;
-/*
-struct Servicios{
-char tipo_de_servicio[10];
-int cantidad_de_servicios;
-int cantidad_ticket;
-char hora_inicio[6];
-char hora_fin[6];
-};
-*/
+
 struct Ticket{
-char rut_funcionario[10];
-int day_of_month;
-char time[6];
+  char rut_funcionario[10];
+  int day_of_month;
+  char time[6];
 };
 
-Ticket* lecturaArchivoBin(){
-  int i,cantidad_de_registros;
+struct Servicios{
+  string nombre;
+  int ticket_diario;
+  int ticket_mensual;
+  char inicio_servicio[6];
+  char fin_servicio[6];
+};
+
+struct Funcionarios{
+  char rut_funcionario[10];
+  int tickets_validos;
+  int tickets_totales;
+};
+
+struct Rut{
+  char rut[10];
+};
+
+/*****
+* Servicios lecturaArchivoASCII 
+******
+* La funcion realiza una lectura de un archivo ASCII y lo almacena en un struct
+******
+* Input:
+* Datos obtenidos en un archivo.t
+* 
+* 
+******
+* Returns:
+* Puntero, retorna el puntero utilizado en el llenado del struct Servicios
+*****/
+Servicios* lecturaArchivoASCII(int &num_servicios){
+  int i=0;
+  ifstream archivo;
+  archivo.open("servicios.txt");
+  if(!archivo.is_open()){
+    cout<<"El archivo no ha podido ser leído";
+  }
+  archivo>>num_servicios;
+  Servicios* servicios;
+  servicios = new Servicios[num_servicios];
+  for(i=0;i<num_servicios;i++){
+    archivo>>servicios[i].nombre;
+    archivo>>servicios[i].ticket_diario;
+    archivo>>servicios[i].ticket_mensual;
+    archivo>>servicios[i].inicio_servicio;
+    archivo>>servicios[i].fin_servicio;
+  }
+  archivo.close();
+  return servicios;
+}
+
+/*****
+* Ticket lecturaArchivoBin
+******
+* La funcion realiza una lectura al archivo binario y lo almacena en struct
+******
+* Input:
+* Datos obtenidos en un archivo.dat
+* 
+* 
+******
+* Returns:
+* Puntero, retorna el puntero utilizado en el llenado del struct Ticket
+*****/
+Ticket* lecturaArchivoBin(int &cantidad_de_tickets){
   Ticket *tickets;
   ifstream archivo;
   archivo.open("tickets.dat",ios::binary);
-  
   if(!archivo.is_open()){
     cout<<"El archivo no ha podido ser leído";
   }
-  
-  archivo.read((char *)&cantidad_de_registros, sizeof(int));
-  tickets = new Ticket[cantidad_de_registros];
-  
-  archivo.read((char *) tickets,sizeof(Ticket)*cantidad_de_registros);
+  archivo.read((char *)&cantidad_de_tickets, sizeof(int));
+  tickets = new Ticket[cantidad_de_tickets]; 
+  archivo.read((char *)tickets,sizeof(Ticket)*cantidad_de_tickets);
   archivo.close();
-  //for(i=0;i<n;i++){
-  //  cout<<tickets[i].rut_funcionario<<" "<<tickets[i].day_of_month<<" "<<tickets[i].time<<endl;
-  //}
   return tickets;
 }
 
-string lecturaArchivoASCI(){
-  int i=0;
-  string linea;
-  char n;
-  
-  string servicios[10]; 
-  
-  ifstream archivo;
-  archivo.open("servicios.txt");
-  
-  if(!archivo.is_open()){
-    cout<<"El archivo no ha podido ser leído";
-  }
-
-  int x = stoi(getline(archivo,linea));
-  while(getline(archivo,linea)){
-    if(i==0){
-      strcpy(n,linea);
+/*****
+* int contar_validos
+******
+* La funcion cuenta los valores validos 
+******
+* 
+* 
+* 
+* 
+******
+* Returns:
+* int, retorna la cantidad de validos
+*****/
+int contar_validos(string rut, string* ruts, int &validos_totales){
+  int validos=0, i;
+  for(i = 0; i< validos_totales; i++){
+    if(rut==ruts[i]){
+      validos++;
     }
-    else if{
-      
-    }
-    i++
   }
-  
-  archivo.close();
-  return n;
+  return validos;
 }
 
-int main(){
-  lecturaArchivoASCI(); // Ready
-  //lecturaArchivoBin();
+/*****
+* int contar_totales
+******
+* La funcion realiza un conteo de los tickets validos e invalidos para un rut especifico
+******
+* Input:
+* struct Ticket
+* string rut definido en el main
+* int cantidad_de_tickets
+******
+* Returns:
+* Puntero, retorna el puntero utilizado en el llenado del struct Ticket
+*****/  
+int contar_totales(string rut, Ticket* tickets, int cantidad_de_tickets){
+  int totales = 0, j;
+  for(j = 0; j < cantidad_de_tickets; j++){
+    if (rut==tickets[j].rut_funcionario){
+      totales++;
+    }
+  }
+  return totales;
+}
+
+/*****
+* void ordenar_ruts
+******
+* La funcion ordena los ruts lexicograficamente
+******
+* 
+* 
+* 
+* 
+******
+* Returns:
+* Al ser tipo void, no tiene un retorno.
+*****/
+void ordenar_ruts(Ticket* tickets, string* ruts, int &validos_totales, int cantidad_de_tickets){
+  int i,j, cantidad_rut_unicos = 0;
+  string ruts_orden[cantidad_de_tickets],aux_orden, rut;
+  string ruts_unicos_v1[cantidad_de_tickets];
+  
+  for(i=0;i<cantidad_de_tickets;i++){
+    ruts_orden[i]=tickets[i].rut_funcionario;
+    ruts_unicos_v1[i]="/0";
   }
 
-/*
+  for(i=0;i<cantidad_de_tickets;i++){
+    for(j=0;j<cantidad_de_tickets-1;j++){
+      if(ruts_orden[j]>ruts_orden[j+1]){
+        aux_orden=ruts_orden[j];
+        ruts_orden[j]=ruts_orden[j+1];
+        ruts_orden[j+1]=aux_orden;
+      }
+    }
+  }
+  bool flag;
+  flag = true;
+  for (i=0;i < cantidad_de_tickets;i++){
+    if(strcmp(rut.c_str(),ruts_orden[i].c_str())!=0){
+      cantidad_rut_unicos++;
+      rut=ruts_orden[i];
+      int t = contar_totales(rut, tickets, cantidad_de_tickets);
+      cout<< rut <<" "<<contar_validos(rut, ruts, validos_totales) <<"/"<< t << endl;
+      }
+  }
+}
 
 
-
-Cosas a considerar para detección de ticket invalidos:
-Ticket fuera del horario
-Límite de ticket x dia de un servicio
-limite ticket mensual de un servicio
-limite de ticket mensuajes totales
-
-
-salida:
-Rut-TicketsValidos/TicketsTotalesEmitidos
-Ordenada lexicográficamente
-*/
-
-
-void ordenamiento(){
+/*****
+* int main
+******
+* La función main 
+******
+* Input:
+* tipoParámetro NombreParámetro : Descripción Parámetro
+* .......
+******
+* Returns:
+* TipoRetorno, Descripción retorno
+*****/
+int main(){
+  Ticket* tickets, *t;
+  Servicios* servicios;
+  int num_servicios, cantidad_de_tickets, cantidad_de_ruts, n, i, j, v, ruts_unicos;
   
+  
+  servicios = lecturaArchivoASCII(num_servicios);
+  tickets = lecturaArchivoBin(cantidad_de_tickets);
+
+  string aux_ticket, aux_servicio, aux_serviciofin, s;
+  int hora_ticket, hora_servicio, hora_fin_servicio, validos_totales = 0,invalidos_totales=0,suma_validos=0;
+
+  string* ruts, *rut_ordenado, *rut_no_repetido;
+  ruts = new string[cantidad_de_tickets];
+  for(i = 0; i < cantidad_de_tickets; i++){
+    aux_ticket =tickets[i].time[0];
+    aux_ticket+=tickets[i].time[1];
+    aux_ticket+=tickets[i].time[3];
+    aux_ticket+=tickets[i].time[4];
+    hora_ticket=stoi(aux_ticket);
+   
+    for(j=0;j<num_servicios;j++){
+      aux_servicio=servicios[j].inicio_servicio[0];
+      aux_servicio+=servicios[j].inicio_servicio[1]; 
+      aux_servicio+=servicios[j].inicio_servicio[3];
+      aux_servicio+=servicios[j].inicio_servicio[4];
+      hora_servicio=stoi(aux_servicio);
+      //
+      aux_serviciofin=servicios[j].fin_servicio[0];
+      aux_serviciofin+=servicios[j].fin_servicio[1];
+      aux_serviciofin+=servicios[j].fin_servicio[3];
+      aux_serviciofin+=servicios[j].fin_servicio[4];
+      hora_fin_servicio=stoi(aux_serviciofin);    
+      if((hora_fin_servicio > hora_servicio) ? hora_ticket>=hora_servicio && hora_ticket<=hora_fin_servicio : hora_ticket>=hora_servicio || hora_ticket<=hora_fin_servicio ) {
+        ruts[validos_totales] = tickets[i].rut_funcionario;
+        validos_totales++;
+      }
+    }
+  }
+  rut_ordenado = new string[validos_totales];
+  ordenar_ruts(tickets, ruts, validos_totales, cantidad_de_tickets);
+
+  return 0;
 }
