@@ -19,27 +19,16 @@ struct Servicios{
   char fin_servicio[6];
 };
 
-struct Funcionarios{
-  char rut_funcionario[10];
-  int tickets_validos;
-  int tickets_totales;
-};
-
-struct Rut{
-  char rut[10];
-};
-
 /*****
-* Servicios lecturaArchivoASCII 
+* Servicios* lecturaArchivoASCII 
 ******
 * La funcion realiza una lectura de un archivo ASCII y lo almacena en un struct
 ******
 * Input:
-* Datos obtenidos en un archivo.t
-* 
+* int &num_servicios: trabaja con la dirección de memoria de num_servicios
 * 
 ******
-* Returns:
+* Return:
 * Puntero, retorna el puntero utilizado en el llenado del struct Servicios
 *****/
 Servicios* lecturaArchivoASCII(int &num_servicios){
@@ -69,11 +58,10 @@ Servicios* lecturaArchivoASCII(int &num_servicios){
 * La funcion realiza una lectura al archivo binario y lo almacena en struct
 ******
 * Input:
-* Datos obtenidos en un archivo.dat
-* 
+* int &cantidad_de_tickets: trabaja con la dirección de memoria del int cantidad_de_tickets
 * 
 ******
-* Returns:
+* Return:
 * Puntero, retorna el puntero utilizado en el llenado del struct Ticket
 *****/
 Ticket* lecturaArchivoBin(int &cantidad_de_tickets){
@@ -93,14 +81,14 @@ Ticket* lecturaArchivoBin(int &cantidad_de_tickets){
 /*****
 * int contar_validos
 ******
-* La funcion cuenta los valores validos 
+* La funcion cuenta los tickets validos para un rut específico
 ******
-* 
-* 
-* 
+* string rut: rut específico
+* string* ruts: arreglo de ruts asignado en main
+* int &validos_totales: cantidad de tickets validos en general
 * 
 ******
-* Returns:
+* Return:
 * int, retorna la cantidad de validos
 *****/
 int contar_validos(string rut, string* ruts, int &validos_totales){
@@ -116,14 +104,14 @@ int contar_validos(string rut, string* ruts, int &validos_totales){
 /*****
 * int contar_totales
 ******
-* La funcion realiza un conteo de los tickets validos e invalidos para un rut especifico
+* La funcion realiza un conteo de los tickets validos e invalidos para un rut específico
 ******
 * Input:
 * struct Ticket
 * string rut definido en el main
 * int cantidad_de_tickets
 ******
-* Returns:
+* Return:
 * Puntero, retorna el puntero utilizado en el llenado del struct Ticket
 *****/  
 int contar_totales(string rut, Ticket* tickets, int cantidad_de_tickets){
@@ -139,26 +127,24 @@ int contar_totales(string rut, Ticket* tickets, int cantidad_de_tickets){
 /*****
 * void ordenar_ruts
 ******
-* La funcion ordena los ruts lexicograficamente
+* La funcion ordena los ruts lexicograficamente e imprime la cantidad de tickets validos junto a la cantidad de tickets totales para todos los ruts.
 ******
-* 
-* 
-* 
-* 
+* Input:
+* struct Ticket
+* string* ruts: ruts que poseen los tickets validos
+* int &validos_totales: cantidad de tickets validos totales
+* int cantidad_de_tickets: cantidad de tickets existentes
+*
 ******
-* Returns:
+* Return:
 * Al ser tipo void, no tiene un retorno.
 *****/
 void ordenar_ruts(Ticket* tickets, string* ruts, int &validos_totales, int cantidad_de_tickets){
-  int i,j, cantidad_rut_unicos = 0;
-  string ruts_orden[cantidad_de_tickets],aux_orden, rut;
-  string ruts_unicos_v1[cantidad_de_tickets];
-  
+  int i,j;
+  string ruts_orden[cantidad_de_tickets],aux_orden,rut;
   for(i=0;i<cantidad_de_tickets;i++){
-    ruts_orden[i]=tickets[i].rut_funcionario;
-    ruts_unicos_v1[i]="/0";
+    ruts_orden[i] = tickets[i].rut_funcionario;
   }
-
   for(i=0;i<cantidad_de_tickets;i++){
     for(j=0;j<cantidad_de_tickets-1;j++){
       if(ruts_orden[j]>ruts_orden[j+1]){
@@ -172,11 +158,10 @@ void ordenar_ruts(Ticket* tickets, string* ruts, int &validos_totales, int canti
   flag = true;
   for (i=0;i < cantidad_de_tickets;i++){
     if(strcmp(rut.c_str(),ruts_orden[i].c_str())!=0){
-      cantidad_rut_unicos++;
       rut=ruts_orden[i];
       int t = contar_totales(rut, tickets, cantidad_de_tickets);
       cout<< rut <<" "<<contar_validos(rut, ruts, validos_totales) <<"/"<< t << endl;
-      }
+    }
   }
 }
 
@@ -184,43 +169,39 @@ void ordenar_ruts(Ticket* tickets, string* ruts, int &validos_totales, int canti
 /*****
 * int main
 ******
-* La función main 
+* La función main contiene las condiciones para cumplir tickets validos y almacena la cantidad de tickets validos llamando a la funcion ordenar_ruts
 ******
 * Input:
-* tipoParámetro NombreParámetro : Descripción Parámetro
-* .......
+* La función no posee parámetros
+* 
 ******
 * Returns:
-* TipoRetorno, Descripción retorno
+* return 0: retorna el valor cero
 *****/
 int main(){
-  Ticket* tickets, *t;
+  Ticket* tickets;
   Servicios* servicios;
-  int num_servicios, cantidad_de_tickets, cantidad_de_ruts, n, i, j, v, ruts_unicos;
-  
-  
+  int num_servicios, cantidad_de_tickets, i, j;
+  int hora_ticket, hora_servicio, hora_fin_servicio, validos_totales=0;
+  string aux_ticket, aux_servicio, aux_serviciofin;
+  string* ruts;
   servicios = lecturaArchivoASCII(num_servicios);
   tickets = lecturaArchivoBin(cantidad_de_tickets);
-
-  string aux_ticket, aux_servicio, aux_serviciofin, s;
-  int hora_ticket, hora_servicio, hora_fin_servicio, validos_totales = 0,invalidos_totales=0,suma_validos=0;
-
-  string* ruts, *rut_ordenado, *rut_no_repetido;
   ruts = new string[cantidad_de_tickets];
   for(i = 0; i < cantidad_de_tickets; i++){
-    aux_ticket =tickets[i].time[0];
+    aux_ticket = tickets[i].time[0];
     aux_ticket+=tickets[i].time[1];
     aux_ticket+=tickets[i].time[3];
     aux_ticket+=tickets[i].time[4];
     hora_ticket=stoi(aux_ticket);
-   
+    
     for(j=0;j<num_servicios;j++){
       aux_servicio=servicios[j].inicio_servicio[0];
       aux_servicio+=servicios[j].inicio_servicio[1]; 
       aux_servicio+=servicios[j].inicio_servicio[3];
       aux_servicio+=servicios[j].inicio_servicio[4];
       hora_servicio=stoi(aux_servicio);
-      //
+
       aux_serviciofin=servicios[j].fin_servicio[0];
       aux_serviciofin+=servicios[j].fin_servicio[1];
       aux_serviciofin+=servicios[j].fin_servicio[3];
@@ -232,8 +213,10 @@ int main(){
       }
     }
   }
-  rut_ordenado = new string[validos_totales];
+  
   ordenar_ruts(tickets, ruts, validos_totales, cantidad_de_tickets);
-
+  delete[] servicios;
+  delete[] tickets;
+  delete[] ruts;
   return 0;
 }
